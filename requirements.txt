@@ -1,0 +1,8 @@
+aria2p>=0.11.3
+feedparser>=6.0.10
+pyaml>=23.7.0
+requests>=2.31.0
+pysocks>=1.7.1
+loguru>=0.7.0
+bypy
+dotenv

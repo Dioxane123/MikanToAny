@@ -4,3 +4,9 @@ torrents/
 .idea/
 test.py
 venv/
+env/
+.cache
+.env
+bangumi.py
+bangumi/
+rss.py
