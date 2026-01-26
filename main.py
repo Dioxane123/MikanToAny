@@ -37,22 +37,21 @@ else:
     config_path = Path(".cache/bangumi_config/config.json")
 
 # 加载 Config
-config = None
 if config_path.exists() and config_path.is_file():
     if config_path.suffix == '.json':
         config = json.load(config_path.open(encoding="utf8"))
         logger.info(f"成功加载配置文件: {config_path.as_posix()}")
     else:
-        logger.warning(f"不支持的配置文件类型: {config_path.name}")
-
-if not config:
+        logger.error(f"不支持的配置文件类型: {config_path.name}")
+        sys.exit(1)
+else:
     logger.error("配置文件未找到或加载失败!")
     sys.exit(1)
 
 # --- 2. 路径与环境设置 ---
 
 # 历史记录文件路径
-if history_path_env := os.getenv("MTA_HISTORY_FILE"):
+if history_path_env := os.getenv("MTA_HISTORY_FILE", None):
     history_path = Path(history_path_env)
 else:
     history_path = workspace.joinpath(".cache", "bangumi_config", "history.txt")
@@ -60,7 +59,7 @@ logger.info(f"使用历史记录文件: {history_path.as_posix()}")
 history_path.parent.mkdir(parents=True, exist_ok=True)
 
 # 种子文件保存根目录 (用于同步到网盘)
-if torrent_dir := os.getenv("MTA_TORRENTS_DIR"):
+if torrent_dir := os.getenv("MTA_TORRENTS_DIR", None):
     torrent_base_dir = Path(torrent_dir)
 else:
     torrent_base_dir = workspace / "bangumi" / "bangumi"
@@ -74,9 +73,9 @@ logger.info(f"最大历史记录条数: {MAX_HISTORY}")
 # --- 3. 初始化网络请求 (Session & Proxy) ---
 
 session = requests.session()
-if http_proxy := os.getenv("HTTP_PROXY"):
+if http_proxy := os.getenv("HTTP_PROXY", None):
     session.proxies.update(http=http_proxy)
-if https_proxy := os.getenv("HTTPS_PROXY"):
+if https_proxy := os.getenv("HTTPS_PROXY", None):
     session.proxies.update(https=https_proxy)
 if proxy := config.get('proxy'):
     session.proxies.update(proxy)
@@ -200,10 +199,11 @@ def get_latest(url: str, rule: str | None = None, savedir: str | None = None):
         bangumi_name = savedir
     else:
         # 尝试从标题解析，Mikan RSS 标题通常是 "Mikan Project - <Name>"
-        bangumi_name = entries['feed']['title'].replace("Mikan Project - ", "").strip()
+        feed_title = getattr(entries.feed, 'title', '')
+        bangumi_name = feed_title.replace("Mikan Project - ", "").strip()
 
     for entry in entries['entries']:
-        title = entry['title'].strip()
+        title = str(entry.get('title', '')).strip() if hasattr(entry, 'title') else ""
 
         # 规则过滤
         if rule and not re.search(rule, title):
@@ -220,7 +220,7 @@ def get_latest(url: str, rule: str | None = None, savedir: str | None = None):
                 download_url = link['href']
                 break
 
-        if download_url:
+        if isinstance(download_url, str):
             logger.info(f"发现新番剧: {title}")
 
             # 步骤 1: 始终下载种子到本地 (为了 BaiduPan 同步)
