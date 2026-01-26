@@ -1,5 +1,66 @@
 <div align="center">
 
+# Mikan to Any
+
+获取蜜柑计划的RSS链接，将最新的种子文件同步到百度网盘或者利用Aria2下载。
+</div>
+
+---
+
+**改自[Mikan to Aria2](https://github.com/Taokyla/MikanToAria2)**
+原本是做成插件给bot用，但是由于服务器即将到期且找不到合适的替代所以姑且做一个独立版用于个人追番用。
+bypy在使用时需要登录，自行搜索教程解决。使用百度网盘的原因主要是他有无敌的离线下载，在早期如果磁力请求的文件在网盘内可以找到就几乎是秒入盘，现在好像没这个功能了，可惜。
+## 使用方法
+1. 创建项目对应环境
+```bash
+pip install -r requirements.txt
+```
+2. 修改[env_template.txt](https://github.com/Dioxane123/MikanToAny/blob/master/env_template.txt)中环境变量对应值，留空即使用默认值。部分环境变量解释如下：
+```
+MTA_CONFIGPATH: 配置文件路径，默认".cache/bangumi_config/config.json"
+MTA_HISTORY_FILE: 历史记录文件路径".cache/bangumi_config/history.txt"
+MTA_TORRENTS_DIR: 种子下载目录。种子文件会下载到"$MTA_TORRENTS_DIR/bangumi"目录下，网盘会同步"$MTA_TORRENTS_DIR"目录(即同步"bangumi"文件夹)
+MTA_MAX_HISTORY: 最大历史记录数
+MTA_USER_AGENT: 访问RSS链接时使用的浏览器头
+HTTP_PROXY: 访问RSS链接时的代理设置
+HTTPS_PROXY: 访问RSS链接时的代理设置
+MTA_ARIA2_HOST: Aria2的rpc主机地址，默认"localhost"
+MTA_ARIA2_PORT: Aria2的端口，默认"6800"
+MTA_ARIA2_SECRET: Aria2的rpc密钥，默认为空
+```
+3. 修改[env_template.txt](https://github.com/Dioxane123/MikanToAny/blob/master/env_template.txt)的文件名为`.env`
+```bash
+mv env_template.txt .env
+```
+4. 创建你的配置文件并放到你的配置文件路径下。示例如下：
+```json
+{
+    "mikan": [
+        {
+            "url": "https://mikanime.tv/RSS/Bangumi?bangumiId=3583&subgroupid=370",
+            "title": "直至魔女消逝",
+            "enable": true,
+            "rule": "",
+            "savedir": "直至魔女消逝"
+        }
+    ]
+}
+```
+5. 运行代码，添加`--aria2`表示同步网盘且使用Aria2下载种子链接，不添加此项则仅同步网盘。
+```bash
+source venv/bin/activate
+python main.py --aria2
+```
+## 未来更新计划
+[ ] - 合适的方法交互更新配置文件，现在手写配置文件有点蠢。
+> 本来是在QQ上和bot聊天修改配置文件的，可惜服务器过期了qwq
+
+以下原README
+---
+
+
+<div align="center">
+
 # Mikan to Aria2
 
 读取蜜柑计划的rss订阅，下载最新的动画！

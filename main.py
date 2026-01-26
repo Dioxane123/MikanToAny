@@ -59,10 +59,11 @@ logger.info(f"使用历史记录文件: {history_path.as_posix()}")
 history_path.parent.mkdir(parents=True, exist_ok=True)
 
 # 种子文件保存根目录 (用于同步到网盘)
-if torrent_dir := os.getenv("MTA_TORRENTS_DIR", None):
-    torrent_base_dir = Path(torrent_dir)
+if async_dir := os.getenv("MTA_TORRENTS_DIR", None):
+    async_dir = Path(async_dir)
 else:
-    torrent_base_dir = workspace / "bangumi" / "bangumi"
+    async_dir = workspace / "bangumi"
+torrent_base_dir = async_dir / "torrents"
 logger.info(f"种子文件将保存在: {torrent_base_dir.as_posix()}")
 torrent_base_dir.mkdir(parents=True, exist_ok=True)
 
@@ -96,8 +97,8 @@ if args.aria2:
             logger.error(f"Aria2 连接失败 (Config配置): {e}")
             sys.exit(1)
     else:
-        host = os.getenv("MTA_ARIA2_HOST")
-        port = os.getenv("MTA_ARIA2_PORT")
+        host = os.getenv("MTA_ARIA2_HOST", "localhost")
+        port = os.getenv("MTA_ARIA2_PORT", "6800")
         secret = os.getenv("MTA_ARIA2_SECRET", "")
         if host and port:
             try:
@@ -290,7 +291,7 @@ def run():
             # localdir 是本地种子根目录
             # remotedir 是网盘中的目标目录，通常 ByPy 默认在 /apps/bypy/ 下
             # 这里 syncup 会把 torrent_base_dir 下的内容上传到网盘
-            BaiduPan.syncup(localdir=str(Path.home() / "bangumi"))
+            BaiduPan.syncup(localdir=str(async_dir))
             logger.success("百度网盘同步完成。")
         except Exception as e:
             logger.error(f"百度网盘同步失败: {e}")
