@@ -63,7 +63,7 @@ if async_dir := os.getenv("MTA_TORRENTS_DIR", None):
     async_dir = Path(async_dir)
 else:
     async_dir = workspace / "bangumi"
-torrent_base_dir = async_dir / "torrents"
+torrent_base_dir = async_dir / "bangumi"
 logger.info(f"种子文件将保存在: {torrent_base_dir.as_posix()}")
 torrent_base_dir.mkdir(parents=True, exist_ok=True)
 
